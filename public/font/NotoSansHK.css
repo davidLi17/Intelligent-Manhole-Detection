@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'NotoSansHK-Regular';  /* 自定义字体名称 */
+    src: url('NotoSansHK-Regular.ttf');  /* 字体文件名 */
+}
+
+@font-face {
+    font-family: 'Source Han Sans K Normal';  /* 自定义字体名称 */
+    src: url('Source Han Sans K Normal.ttf');  /* 字体文件名 */
+}
