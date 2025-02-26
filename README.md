@@ -22,8 +22,3 @@ npm install  # 推荐pnpm install
 # 启动开发服务器
 npm run serve
 ```
-
-后端请求设置在:
-![image-20250218211006603](https://s2.loli.net/2025/02/18/4cqC8AIQBEKbF5v.png)
-
-已经写好了
