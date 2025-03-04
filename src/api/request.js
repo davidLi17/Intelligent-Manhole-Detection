@@ -10,7 +10,7 @@ const request = axios.create({
 request.interceptors.request.use(
 	(config) => {
 		// 可以在这里添加例如token等请求头
-		config.headers["authorization"] = localStorage.getItem("token");
+		config.headers["authorization"] = sessionStorage.getItem("token");
 		return config;
 	},
 	(error) => {

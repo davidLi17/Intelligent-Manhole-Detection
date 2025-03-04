@@ -6,7 +6,7 @@ const vanna = axios.create({
 	},
 });
 vanna.interceptors.request.use((config) => {
-	// const token = localStorage.getItem("token");
+	// const token = sessionStorage.getItem("token");
 	// if (token) {
 	// config.headers.Authorization = `Bearer ${token}`;
 	// }
@@ -18,7 +18,7 @@ vanna.interceptors.response.use(
 	},
 	(error) => {
 		// if (error.response.status === 401) {
-		// localStorage.removeItem("token");
+		// sessionStorage.removeItem("token");
 		// window.location.href = "/login";
 		// }
 		return error;
