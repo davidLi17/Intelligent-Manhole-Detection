@@ -50,44 +50,46 @@
 </template>
 
 <script>
+	// 导入高德地图管理器和懒加载实例
 	import { AMapManager, lazyAMapApiLoaderInstance } from "vue-amap";
 	let amapManager = new AMapManager();
 
 	export default {
 		props: {
 			width: {
-				default: 700,
+				default: 700, // 地图默认宽度
 			},
 			height: {
-				default: 600,
+				default: 600, // 地图默认高度
 			},
 		},
 		data() {
 			let self = this;
 			return {
-				amap_id: Math.random().toString(36).substr(2).toLocaleUpperCase(),
-				address: null,
-				searchKey: "",
-				amapManager,
-				markers: [],
+				amap_id: Math.random().toString(36).substr(2).toLocaleUpperCase(), // 生成随机地图容器ID
+				address: null, // 存储地址信息
+				searchKey: "", // 搜索关键词
+				amapManager, // 地图管理器实例
+				markers: [], // 地图标记点数组
 				searchOption: {
-					city: "全国",
-					citylimit: true,
+					city: "全国", // 搜索范围为全国
+					citylimit: true, // 限制在城市内搜索
 				},
-				center: [112.001771, 32.679353],
-				zoom: 17,
-				lng: 0,
-				lat: 0,
-				loaded: false,
+				center: [112.001771, 32.679353], // 地图初始中心点
+				zoom: 17, // 地图缩放级别
+				lng: 0, // 经度
+				lat: 0, // 纬度
+				loaded: false, // 地图加载状态
 				events: {
 					init() {
+						// 地图初始化事件
 						lazyAMapApiLoaderInstance.load().then(() => {
 							self.initSearch();
 						});
 					},
-					// 点击获取地址的数据
 					click(e) {
-						self.markers = []; // 清空现有标记点 (为点击位置的新标记点做准备)
+						// 地图点击事件
+						self.markers = []; // 清空现有标记点
 						let lng = 0;
 						let lat = 0;
 						if (e.lnglat) {
@@ -95,66 +97,45 @@
 							lat = e.lnglat.lat;
 						}
 
-						//console.log(lng,lat)
 						self.lng = lng;
 						self.lat = lat;
-						self.center = [lng, lat]; // 更新组件的 lng, lat 和 center 数据属性以反映点击位置。这将使地图中心位于点击点。
-						//当前点击位置的经纬度
-						//console.log('self.makers',self.markers);
-						//self.markers.push([lng, lat])
+						self.center = [lng, lat]; // 更新地图中心点
 
-						self.markers[0] = [lng, lat]; // 在点击的坐标添加新的标记点。此组件旨在一次只显示一个标记点。
+						self.markers[0] = [lng, lat]; // 添加新的标记点
 
-						// 逆地理编码: 将经纬度转换为地址
+						// 初始化地理编码服务
 						let geocoder = new AMap.Geocoder({
 							radius: 1000,
 							extensions: "all",
 						});
 
+						// 获取地址信息
 						geocoder.getAddress([lng, lat], function (status, result) {
 							console.log(lng);
 							if (status === "complete" && result.info === "OK") {
 								if (result && result.regeocode) {
-									//地址打印测试语句
-									// console.log('result.regeocode.formattedAddress'+result.regeocode.formattedAddress)
 									self.address = result.regeocode.formattedAddress;
 									self.searchKey = result.regeocode.formattedAddress;
 									self.$emit("updateLocation", lng, lat, self.searchKey);
-									self.$nextTick(); //确保 Vue 已经更新 DOM 之后再执行任何进一步的操作。
+									self.$nextTick();
 								}
 							}
 						});
 					},
 				},
-				// 一些工具插件
 				plugin: [
-					// {
-					//   pName: 'Geocoder',
-					//   events: {
-					//     init (o) {
-					//       console.log(o.getAddress())
-					//     }
-					//   }
-					// },
 					{
-						// 定位
-						pName: "Geolocation",
+						pName: "Geolocation", // 定位插件
 						events: {
 							init(o) {
-								// o是高德地图定位插件实例
+								// 获取当前位置
 								o.getCurrentPosition((status, result) => {
 									if (result && result.position) {
-										// 设置经度
-										self.lng = result.position.lng;
-										// 设置维度
-										self.lat = result.position.lat;
-										// 设置坐标
-										self.center = [self.lng, self.lat]; // 更新 self.lng, self.lat 和 self.center 以将地图中心定位到用户的位置。
-										// self.markers.push([self.lng, self.lat])
-										self.markers[0] = [self.lng, self.lat];
-										// load
-										self.loaded = true;
-										// 页面渲染好后
+										self.lng = result.position.lng; // 设置经度
+										self.lat = result.position.lat; // 设置纬度
+										self.center = [self.lng, self.lat]; // 设置地图中心点
+										self.markers[0] = [self.lng, self.lat]; // 添加标记点
+										self.loaded = true; // 标记加载完成
 										self.$nextTick();
 									}
 								});
@@ -162,40 +143,28 @@
 						},
 					},
 					{
-						// 工具栏
-						pName: "ToolBar",
+						pName: "ToolBar", // 工具栏插件
 						events: {
-							init(instance) {
-								// console.log(instance);
-							},
+							init(instance) {},
 						},
 					},
 					{
-						// 鹰眼
-						pName: "OverView",
+						pName: "OverView", // 鹰眼插件
 						events: {
-							init(instance) {
-								// console.log(instance);
-							},
+							init(instance) {},
 						},
 					},
 					{
-						// 地图类型
-						pName: "MapType",
+						pName: "MapType", // 地图类型切换插件
 						defaultType: 0,
 						events: {
-							init(instance) {
-								// console.log(instance);
-							},
+							init(instance) {},
 						},
 					},
 					{
-						// 搜索
-						pName: "PlaceSearch",
+						pName: "PlaceSearch", // 地点搜索插件
 						events: {
-							init(instance) {
-								// console.log(instance)
-							},
+							init(instance) {},
 						},
 					},
 				],
@@ -203,21 +172,22 @@
 		},
 		methods: {
 			initSearch() {
+				// 初始化搜索功能
 				let vm = this;
-				let map = this.amapManager.getMap(); // 从 amapManager 获取 AMap 实例
+				let map = this.amapManager.getMap(); // 获取地图实例
 				AMapUI.loadUI(["misc/PoiPicker"], function (PoiPicker) {
 					var poiPicker = new PoiPicker({
-						input: "search", // 要绑定到的输入字段的 ID (重要: 'search' 匹配 <input id="search">)
+						input: "search", // 输入框ID
 						placeSearchOptions: {
-							map: map, //将 AMap 实例传递给 PoiPicker
+							map: map, // 地图实例
 							pageSize: 10,
 						},
-						suggestContainer: "searchTip", // 用于显示建议的 div 的 ID (重要: 'searchTip' 匹配 <div id="searchTip">)
-						searchResultsContainer: "searchTip", // 搜索结果的 ID
+						suggestContainer: "searchTip", // 提示框容器ID
+						searchResultsContainer: "searchTip", // 搜索结果容器ID
 					});
-					vm.poiPicker = poiPicker; // 将 PoiPicker 实例存储在组件中
+					vm.poiPicker = poiPicker; // 保存搜索实例
 
-					// 监听poi选中信息
+					// POI选择事件处理
 					poiPicker.on("poiPicked", function (poiResult) {
 						console.log(poiResult);
 						let source = poiResult.source;
@@ -226,12 +196,11 @@
 							poiPicker.searchByKeyword(poi.name);
 						} else {
 							poiPicker.clearSearchResults();
-							vm.markers = []; //清除现有标记点
+							vm.markers = []; // 清除标记点
 							let lng = poi.location.lng;
 							let lat = poi.location.lat;
 							let address = poi.cityname + poi.adname + poi.name;
 							vm.center = [lng, lat];
-							// vm.markers.push([lng, lat])
 							vm.markers[0] = [lng, lat];
 							vm.lng = lng;
 							vm.lat = lat;
@@ -243,19 +212,14 @@
 				});
 			},
 			searchByHand() {
+				// 手动搜索方法
 				if (this.searchKey !== "") {
 					this.poiPicker.searchByKeyword(this.searchKey);
 				}
 			},
 		},
-		mounted() {
-			// console.log('small',this.amap_id)
-		},
-		destroyed() {
-			//经过测试好像没啥用
-			// let map = this.amapManager.getMap()
-			// map.destroy();
-		},
+		mounted() {},
+		destroyed() {},
 	};
 </script>
 

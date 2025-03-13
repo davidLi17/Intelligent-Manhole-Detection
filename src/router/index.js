@@ -52,8 +52,8 @@ const routes = [
     }
   },
   {
-    path: '/detail/:id',
-    name: 'detail',
+    path: '/detial/:id',
+    name: 'detial',
     // component: () => import(/* webpackPrefetch: true */ '@/views/Detial.vue'),
     component: AsyncView("Detial"),
     meta: {
@@ -101,7 +101,7 @@ const router = new VueRouter({
 
 // Navigation guards for preloading and authentication
 router.beforeEach((to, from, next) => {
-  console.log('导航到:', to.name)
+  console.log(`导航到:${to.name}组件`)
   const isAuthenticated = sessionStorage.getItem('token')
 
   // Preload related components based on current route

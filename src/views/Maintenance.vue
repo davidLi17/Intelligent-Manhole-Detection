@@ -195,6 +195,7 @@
 		generatePlotlyChart,
 		generateResByAI,
 	} from "../api/vannaAI";
+	import { processImageURL } from "@/util/util";
 	// import "../../public/font/NotoSansHK.css"
 	export default {
 		data() {
@@ -459,6 +460,20 @@
 				this.$nextTick(() => {
 					this.scrollToBottom();
 				});
+			},
+			arrayList: {
+				handler(newVal) {
+					if (newVal && newVal.length > 0) {
+						newVal.forEach((item) => {
+							if (item.predictedUrl) {
+								item.predictedUrl = processImageURL(item.predictedUrl);
+							}
+							if (item.url) {
+								item.url = processImageURL(item.url);
+							}
+						});
+					}
+				},
 			},
 		},
 		computed: {

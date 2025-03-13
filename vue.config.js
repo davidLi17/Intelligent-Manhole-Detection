@@ -23,6 +23,20 @@ module.exports = defineConfig({ // 使用 defineConfig 函数包裹配置对象�
 					"^/api": "", // 将以 /api 开头的路径重写为空字符串，即请求到 target 时会去除 /api 前缀
 				},
 			},
+			"/public": {  // 添加新的代理配置
+				target: "http://101.126.18.51:3000",
+				changeOrigin: true,
+				pathRewrite: {
+					"^/public": "/public"  // 保持 public 路径不变
+				}
+			},
+			"/result-image": {
+				target: "http://101.126.18.51:3000",
+				changeOrigin: true,
+				pathRewrite: {
+					"^/result-image": "/result-image"
+				}
+			}
 		},
 	},
 	configureWebpack: (config) => { //  使用 configureWebpack 选项可以更细粒度的控制 webpack 配置

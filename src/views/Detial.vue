@@ -7,10 +7,31 @@
 			<div class="left">
 				<div class="image__preview">
 					<el-image
-						style="width: 100%; height: auto"
+						style="width: 100%; height: 100%"
 						:src="url"
 						:preview-src-list="detials"
-						fit="contain">
+						fit="contain"
+						lazy
+						:loading="loadingImg">
+						<div
+							slot="placeholder"
+							class="image-slot">
+							<el-skeleton
+								:loading="true"
+								animated>
+								<template slot="template">
+									<el-skeleton-item
+										variant="image"
+										style="width: 100%; height: 400px" />
+								</template>
+							</el-skeleton>
+						</div>
+						<div
+							slot="error"
+							class="image-slot">
+							<i class="el-icon-picture-outline"></i>
+							<p>加载失败</p>
+						</div>
 					</el-image>
 				</div>
 			</div>
@@ -78,6 +99,8 @@
 	import { getLogByHistoryId, addLog } from "../api/log.js";
 	import { mapGetters } from "vuex";
 	import dayjs from "dayjs";
+	import { processImageURL } from "@/util/util";
+
 	export default {
 		name: "Detial",
 		components: {
@@ -102,6 +125,14 @@
 			};
 		},
 		methods: {
+			preloadImages(urls) {
+				urls.forEach((url) => {
+					if (url) {
+						const img = new Image();
+						img.src = url;
+					}
+				});
+			},
 			addNewLog() {
 				if (this.info == "") {
 					this.$message({
@@ -150,20 +181,34 @@
 				return dayjs(isoTimestamp).format("YYYY-MM-DD HH:mm:ss");
 			},
 			fetchHistoryDetails() {
-				getHistoryById(this.$route.params.id).then((res) => {
-					this.arrayList = res.data.History;
-					this.arrayList.updatedAt = dayjs(this.arrayList.updatedAt).format(
-						"YYYY-M-D"
-					);
-					this.url = this.arrayList.url;
-					this.detials = [this.arrayList.url, this.arrayList.predictedUrl];
-				});
+				getHistoryById(this.$route.params.id)
+					.then((res) => {
+						this.arrayList = res.data.History;
+						this.arrayList.updatedAt = dayjs(this.arrayList.updatedAt).format(
+							"YYYY-M-D"
+						);
+
+						// 处理图片URL,设置为预测后的URL,就是带有矩形框.
+						this.url = processImageURL(this.arrayList.predictedUrl);
+						this.detials = [
+							processImageURL(this.arrayList.url),
+							processImageURL(this.arrayList.predictedUrl),
+						].filter(Boolean); // 过滤掉空值
+						this.preloadImages(this.detials); // 预加载图片
+						this.loadingImg = false;
+					})
+					.catch((err) => {
+						this.loadingImg = false;
+						this.$message.error("图片加载失败");
+					});
 			},
 		},
 		computed: {
 			...mapGetters(["getId"]),
 		},
 		created() {
+			console.log("created函数开始执行,获取数据");
+
 			if (this.getId === "checker") {
 				this.isWorker = false;
 				this.pl = "只有工作人员可更改";
@@ -216,10 +261,25 @@
 	}
 
 	.image__preview {
-		width: 100%; /* 占据全部宽度 */
+		width: 100%;
 		display: flex;
 		justify-content: center;
 		align-items: center;
+		min-height: 40vh; // 设置最小高度
+		background: #f5f7fa; // 加载时的背景色
+		border-radius: 4px;
+		overflow: hidden;
+		transition: all 0.3s ease;
+
+		.el-image {
+			width: 100%;
+			height: auto;
+			transition: opacity 0.3s ease;
+
+			&.is-loading {
+				opacity: 0.6;
+			}
+		}
 	}
 
 	.right {
@@ -238,6 +298,7 @@
 	.contents {
 		width: 100%;
 		margin-top: 1rem;
+		overflow: auto;
 	}
 
 	.box-card {
@@ -309,7 +370,23 @@
 			order: 1; /* 恢复原始顺序 */
 		}
 		.image__preview {
-			height: 70vh;
+			height: 85vh;
+		}
+	}
+	.image-slot {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+		width: 100%;
+		height: 100%;
+		background: #f5f7fa;
+		color: #909399;
+		font-size: 14px;
+
+		.el-icon-picture-outline {
+			font-size: 30px;
+			margin-bottom: 10px;
 		}
 	}
 </style>

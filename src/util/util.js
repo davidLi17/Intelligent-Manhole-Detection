@@ -1,3 +1,11 @@
+const serverURL = "http://101.126.18.51";
+const serverImageURL = "http://101.126.18.51:3000";
+export function processImageURL(url) {
+  if (!url) {
+    return "";
+  }
+  return url.replace(serverURL, serverImageURL);
+}
 // 防抖函数：多次触发事件，只执行最后一次
 export function debounce(fn) {
   console.log('防抖函数被调用');
